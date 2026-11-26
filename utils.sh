@@ -399,6 +399,8 @@ apkmirror_search() {
 		emptyCheck=$($HTMLQ -t -w "div.table-cell:nth-child(1) > a:nth-child(1)" <<<"$node" | xargs)
 		if [ -z "$emptyCheck" ]; then break; fi
 		app_table=$($HTMLQ --text --ignore-whitespace <<<"$node")
+		# Line 2 is the variant name (e.g. "18.5.4.993608717-release-arm64-v8a").
+		if [ -n "${APKMIRROR_VARIANT-}" ] && [ "$(sed -n 2p <<<"$app_table" | xargs)" != "$APKMIRROR_VARIANT" ]; then continue; fi
 		if [ "$(sed -n 3p <<<"$app_table")" != "$apk_bundle" ]; then continue; fi
 		dlurl=$($HTMLQ --base https://www.apkmirror.com --attribute href "div:nth-child(1) > a:nth-child(1)" <<<"$node")
 		if isoneof "$(sed -n 6p <<<"$app_table")" "${appdpi[@]}" &&
@@ -599,10 +601,19 @@ patch_apk() {
 	fi
 
 	pr "$cmd"
-	if eval "$cmd"; then [ -f "$patched_apk" ]; else
+	local log_f="${tmp_files}.log"
+	if ! eval "$cmd" 2>&1 | tee "$log_f"; then
 		rm "$patched_apk" 2>/dev/null || :
 		return 1
 	fi
+	# The CLI skips incompatible patches and still writes an APK. A build with
+	# no patches applied is a stock app, not a release.
+	if grep -q "Applying 0 patches" "$log_f"; then
+		epr "No patches applied to '$stock_input' (wrong app version or variant?)"
+		rm "$patched_apk" 2>/dev/null || :
+		return 1
+	fi
+	[ -f "$patched_apk" ]
 }
 
 check_sig() {
@@ -680,6 +691,15 @@ build_rv() {
 		fi
 		pkgvers=$(get_"${dl_from}"_vers)
 		version=$(get_highest_ver <<<"$pkgvers") || version=$(head -1 <<<"$pkgvers")
+	fi
+	# Gboard's versionName carries a build suffix ("18.5.4.993608717-release-arm64-v8a")
+	# that APKMirror leaves out of its release name but shows per variant. Download
+	# by the bare version, and pick the variant whose name matches in full: the
+	# same release page also lists "-beta-" and "-lite_release-" builds.
+	APKMIRROR_VARIANT=""
+	if [[ $version == *-release* ]]; then
+		APKMIRROR_VARIANT=$version
+		version=${version%%-release*}
 	fi
 	if [ -z "$version" ]; then
 		epr "empty version, not building ${table}."

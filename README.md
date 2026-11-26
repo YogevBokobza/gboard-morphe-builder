@@ -1,56 +1,14 @@
-# ReVanced Magisk Module
-[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/rvc_magisk)
-[![CI](https://github.com/j-hc/revanced-magisk-module/actions/workflows/ci.yml/badge.svg?event=schedule)](https://github.com/j-hc/revanced-magisk-module/actions/workflows/ci.yml)
+# Gboard Morphe builder
 
-Extensive ReVanced builder  
+Builds a non-root Gboard APK patched with
+[jasonwu1994/Gboard-patches](https://github.com/jasonwu1994/Gboard-patches)
+and publishes it as a GitHub release.
 
-Get the [latest CI release](https://github.com/j-hc/revanced-magisk-module/releases).
+- The CI workflow runs daily and builds only when a new patches release is out.
+- Output: `gboard-patches-v<version>-arm64-v8a.apk`.
+- The default "Package Rename" patch installs it as
+  `dev.jason.com.google.android.inputmethod.latin`, next to the stock Gboard.
+- Releases are tracked by [youtube-updater](https://github.com/YogevBokobza/youtube-updater).
 
-Use [**zygisk-detach**](https://github.com/j-hc/zygisk-detach) to detach YouTube and YT Music from Play Store if you are using magisk modules. 
-
-<details><summary><big>Features</big></summary>
-<ul>
- <li> Supports all present and future ReVanced apps (including projects implementing the same interface like Morphe)</li>
- <li> Receives in-app updates</li>
- <li> Can build modules and non-root APKs</li>
- <li> Updated daily with the latest versions of apps and patches</li>
- <li> Optimizes APKs and modules for size</li>
- <li> Modules</li>
-    <ul>
-     <li> handle installation of the correct version of the stock app and all that</li>
-     <li> do not trigger root detections</li>
-     <li> receive updates from Magisk/KernelSU app</li>
-     <li> recompile invalidated odex for faster usage</li>
-    </ul>
-</ul>
-</details>
-
-## To include/exclude patches or patch other apps
-
- * Star the repo :eyes:
- * Use the repo as a [template](https://github.com/new?template_name=revanced-magisk-module&template_owner=j-hc)
- * Customize [`config.toml`](./config.toml) using [rvmm-config-gen](https://j-hc.github.io/rvmm-config-gen/)
- * Run the build [workflow](../../actions/workflows/build.yml)
- * Grab your modules and APKs from [releases](../../releases)
-
-also see here [`CONFIG.md`](./CONFIG.md)
-
-## If you are having trouble with the classic mount method of the modules
-such as,
-- **"Reflash needed"** error after reboots
-- **"Suspicious mount detected"** warnings from root detector apps
-
-You can consider using [rvmm-zygisk-mount](https://github.com/j-hc/rvmm-zygisk-mount)
-
-## Building Locally
-### On Termux
-```console
-bash <(curl -sSf https://raw.githubusercontent.com/j-hc/revanced-magisk-module/main/build-termux.sh)
-```
-
-### On Linux
-```console
-$ git clone https://github.com/j-hc/revanced-magisk-module --depth 1
-$ cd revanced-magisk-module
-$ ./build.sh
-```
+Based on [j-hc/revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)
+(GPL-3.0). See `CONFIG.md` for config options.
